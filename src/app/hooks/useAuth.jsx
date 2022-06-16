@@ -1,11 +1,9 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { toast } from "react-toastify";
 import axios from "axios";
 import userService from "../services/user.service";
-import localStorageService, {
-    setTokens
-} from "../services/localStorage.service";
+import localStorageService, { setTokens } from "../services/localStorage.service";
 import { useHistory } from "react-router-dom";
 
 export const httpAuth = axios.create({
@@ -120,6 +118,14 @@ const AuthProvider = ({ children }) => {
             setLoading(false);
         }
     }
+   async function updateUserData(data) {
+        try {
+            const { content } = await userService.update(data);
+            setUser(content);
+        } catch (error) {
+            errorCatcher(error);
+        }
+    }
     useEffect(() => {
         if (localStorageService.getAccessToken()) {
             getUserData();
@@ -134,7 +140,7 @@ const AuthProvider = ({ children }) => {
         }
     }, [error]);
     return (
-        <AuthContext.Provider value={{ signUp, logIn, currentUser, logOut }}>
+        <AuthContext.Provider value={{ signUp, logIn, currentUser, logOut, updateUserData }}>
             {!isLoading ? children : "Loading..."}
         </AuthContext.Provider>
     );
