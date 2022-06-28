@@ -10,10 +10,12 @@ import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getQualities, getQualitiesLoadingStatus } from "../../../store/qualities";
 import { getProfessions, getProfessionsLoadingStatus } from "../../../store/profession";
+import { getCurrentUserData } from "../../../store/users";
 
 const EditUserPage = () => {
     const history = useHistory();
-    const { currentUser, updateUserData } = useAuth();
+    const { updateUserData } = useAuth();
+    const currentUser = useSelector(getCurrentUserData());
     const [isLoading, setIsLoading] = useState(true);
     const [data, setData] = useState();
     const professions = useSelector(getProfessions());
