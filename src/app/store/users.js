@@ -1,5 +1,5 @@
 import { createAction, createSlice } from "@reduxjs/toolkit";
-import UserService from "../services/user.service";
+import userService from "../services/user.service";
 import authService from "../services/auth.service";
 import localStorageService from "../services/localStorage.service";
 import getRandomInt from "../utils/getRandomInt";
@@ -55,16 +55,30 @@ const usersSlice = createSlice({
             state.isLoggedIn = false;
             state.auth = null;
             state.dataLoaded = false;
+        },
+        userUpdated: (state, action) => {
+            state.entities[state.entities.findIndex((u) => u._id === action.payload._id)] = action.payload;
         }
     }
 });
 
 const { reducer: usersReducer, actions } = usersSlice;
-const { usersRequested, usersReceived, usersRequestFailed, authRequestSuccess, authRequestFailed, userCreated, userLoggedOut } = actions;
+const {
+    usersRequested,
+    usersReceived,
+    usersRequestFailed,
+    authRequestSuccess,
+    authRequestFailed,
+    userCreated,
+    userLoggedOut,
+    userUpdated
+} = actions;
 
 const authRequested = createAction("users/authRequested");
 const userCreateRequested = createAction("users/userCreateRequested");
 const createUserFailed = createAction("users/createUserFailed");
+const userUpdateRequested = createAction("users/userUpdateRequested");
+const userUpdateFailed = createAction("users/userUpdateFailed");
 
 export const login = ({ payload, redirect }) => async (dispatch) => {
     const { email, password } = payload;
@@ -112,7 +126,7 @@ function createUser(payload) {
     return async function (dispatch) {
         dispatch(userCreateRequested());
         try {
-            const { content } = await UserService.create(payload);
+            const { content } = await userService.create(payload);
             dispatch(userCreated(content));
             history.push("/users");
         } catch (error) {
@@ -121,10 +135,21 @@ function createUser(payload) {
     };
 }
 
+export const updateUserData = (payload) => async (dispatch) => {
+    dispatch(userUpdateRequested());
+    try {
+        const { content } = await userService.update(payload);
+        dispatch(userUpdated(content));
+        history.push(`/users/${payload._id}`);
+    } catch (error) {
+        dispatch(userUpdateFailed());
+    }
+};
+
 export const loadUsersList = () => async (dispatch) => {
     dispatch(usersRequested());
     try {
-        const { content } = await UserService.get();
+        const { content } = await userService.get();
         dispatch(usersReceived(content));
     } catch (error) {
         dispatch(usersRequestFailed(error.message));
