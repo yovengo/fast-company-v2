@@ -152,7 +152,7 @@ export const updateUserData = (payload) => async (dispatch) => {
         dispatch(userUpdated(content));
         history.push(`/users/${payload._id}`);
     } catch (error) {
-        dispatch(userUpdateFailed());
+        dispatch(userUpdateFailed(error.message));
     }
 };
 
