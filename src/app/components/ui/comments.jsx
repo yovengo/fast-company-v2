@@ -1,22 +1,32 @@
 import { orderBy } from "lodash";
-import React from "react";
+import React, { useEffect } from "react";
 import CommentsList, { AddCommentForm } from "../common/comments";
-import { useComments } from "../../hooks/useComments";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    createComment,
+    getComments,
+    getCommentsLoadingStatus,
+    loadCommentsList,
+    removeComment
+} from "../../store/comments";
+import { useParams } from "react-router-dom";
+import { getCurrentUserId } from "../../store/users";
 
 const Comments = () => {
-    const { createComment, comments, removeComment } = useComments();
+    const dispatch = useDispatch();
+    const { userId } = useParams();
+    const currentUserId = useSelector(getCurrentUserId());
+    useEffect(() => {
+        dispatch(loadCommentsList(userId));
+    }, [userId]);
+    const isLoading = useSelector(getCommentsLoadingStatus());
+    const comments = useSelector(getComments());
 
     const handleSubmit = (data) => {
-        createComment(data);
-        // api.comments
-        //     .add({ ...data, pageId: userId })
-        //     .then((data) => setComments([...comments, data]));
+        dispatch(createComment(data, userId, currentUserId));
     };
     const handleRemoveComment = (id) => {
-        removeComment(id);
-        // api.comments.remove(id).then((id) => {
-        //     setComments(comments.filter((x) => x._id !== id));
-        // });
+        dispatch(removeComment(id));
     };
     const sortedComments = orderBy(comments, ["created_at"], ["desc"]);
     return (
@@ -32,10 +42,11 @@ const Comments = () => {
                     <div className="card-body ">
                         <h2>Comments</h2>
                         <hr />
-                        <CommentsList
+                        {!isLoading ? <CommentsList
                             comments={sortedComments}
                             onRemove={handleRemoveComment}
-                        />
+                        /> : "Loading..."}
+
                     </div>
                 </div>
             )}

@@ -5,33 +5,30 @@ import SelectField from "../../common/form/selectField";
 import RadioField from "../../common/form/radioField";
 import MultiSelectField from "../../common/form/multiSelectField";
 import BackHistoryButton from "../../common/backButton";
-import { useProfessions } from "../../../hooks/useProfession";
-import { useQualities } from "../../../hooks/useQualities";
-import { useAuth } from "../../../hooks/useAuth";
-import { useHistory } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getQualities, getQualitiesLoadingStatus } from "../../../store/qualities";
+import { getProfessions, getProfessionsLoadingStatus } from "../../../store/profession";
+import { getCurrentUserData, updateUserData } from "../../../store/users";
 
 const EditUserPage = () => {
-    const history = useHistory();
-    const { currentUser, updateUserData } = useAuth();
+    const dispatch = useDispatch();
+    const currentUser = useSelector(getCurrentUserData());
     const [isLoading, setIsLoading] = useState(true);
     const [data, setData] = useState();
-    const { professions, isLoading: professionLoading } = useProfessions();
-    const { qualities, isLoading: qualitiesLoading } = useQualities();
+    const professions = useSelector(getProfessions());
+    const professionLoading = useSelector(getProfessionsLoadingStatus());
+    const qualities = useSelector(getQualities());
+    const qualitiesLoading = useSelector(getQualitiesLoadingStatus());
     const [errors, setErrors] = useState({});
 
-   async function handleSubmit(e) {
+    function handleSubmit(e) {
         e.preventDefault();
         const isValid = validate();
         if (!isValid) return;
-        try {
-            await updateUserData({
-                ...data,
-                qualities: data?.qualities.map((q) => q.value)
-            });
-            history.push(`/users/${data?._id}`);
-        } catch (error) {
-            setErrors(error);
-        }
+        dispatch(updateUserData({
+            ...data,
+            qualities: data?.qualities.map((q) => q.value)
+        }));
         console.log(data);
     }
 
