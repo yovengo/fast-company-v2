@@ -10,12 +10,10 @@ import {
     removeComment
 } from "../../store/comments";
 import { useParams } from "react-router-dom";
-import { getCurrentUserId } from "../../store/users";
 
 const Comments = () => {
     const dispatch = useDispatch();
     const { userId } = useParams();
-    const currentUserId = useSelector(getCurrentUserId());
     useEffect(() => {
         dispatch(loadCommentsList(userId));
     }, [userId]);
@@ -23,7 +21,7 @@ const Comments = () => {
     const comments = useSelector(getComments());
 
     const handleSubmit = (data) => {
-        dispatch(createComment(data, userId, currentUserId));
+        dispatch(createComment({ ...data, pageId: userId }));
     };
     const handleRemoveComment = (id) => {
         dispatch(removeComment(id));
